@@ -1,0 +1,26 @@
+* lazyflymake
+Lightweight syntax checker for Emacs, alternative of =flymake-mode=.
+
+It's does less CPU computing and costs less memory than its rivals.
+
+* Install
+Place =*.el= under [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][Load Path]]. Then add =(require 'lazyflymake)= to your configuration.
+* Usage
+This program is based on =flymake= API. So your existing configuration for =flymake= still works.
+
+You only need delete =(flymake-mode 1)= from you Emacs configuration and insert one line set up:
+#+begin_src elisp
+(add-hook 'prog-mode-hook #'lazyflymake-start)
+#+end_src
+
+Please note this program also set up flymake for Shell script, Emacs Lisp, and Lua automatically.
+
+[[https://github.com/koalaman/shellcheck][Shellcheck]] is required to check shell script.
+
+Lua executable is required to check Lua code.
+* Contact me
+Report bugs at [[https://github.com/redguardtoo/lazyflymake]].
+* License
+This program is free software: you can redistribute it and/or modify it under the terms of the [[https://raw.githubusercontent.com/redguardtoo/lazyflymake/master/LICENSE][GNU General Public License]] as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the [[https://raw.githubusercontent.com/redguardtoo/lazyflymake/master/LICENSE][GNU General Public License]] for more details.
