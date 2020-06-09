@@ -3,7 +3,10 @@ Lightweight syntax checker for Emacs, alternative of =flymake-mode=.
 
 It's does less CPU computing and costs less memory than its rivals.
 
-This program is tested in Emacs 25 and Emacs 26.
+In below screenshot, this program is tested in both Emacs 26 and Emacs 25 (left side is Emacs 26, right side is Emacs 25),
+
+[[file:demo.png]]
+
 * Install
 Place =*.el= under [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][Load Path]]. Then add =(require 'lazyflymake)= to your configuration.
 * Usage
