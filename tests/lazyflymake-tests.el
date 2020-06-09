@@ -37,7 +37,7 @@
       (goto-char (point-min))
       (lazyflymake-start)
       (flymake-goto-next-error)
-      (should (string= "\\.el$" (car (nth 0 flymake-allowed-file-name-masks)))))))
+      (should t))))
 
 (ert-run-tests-batch-and-exit)
 ;;; evil-matchit-tests.el ends here
