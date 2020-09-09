@@ -72,12 +72,14 @@ This variable is for debug and unit test only.")
   (fboundp 'flymake-start))
 
 ;;;###autoload
-(defun lazyflymake-load(file-name-regexp mask)
-  "Load flymake MASK for files matching FILE-NAME-REGEXP."
+(defun lazyflymake-load(file-name-regexp mask &optional force)
+  "Load flymake MASK for files matching FILE-NAME-REGEXP.
+If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is replaced."
   (let* ((lib (intern (concat "lazyflymake-" (symbol-name mask))))
          (prefix (concat "lazyflymake-" (symbol-name mask)))
          (init-fn (intern (format "%s-%s" prefix "init")))
-         (pattern-fn (intern (format "%s-%s" prefix "err-line-pattern"))))
+         (pattern-fn (intern (format "%s-%s" prefix "err-line-pattern")))
+         filtered-masks)
 
     (when lazyflymake-debug
       (message "lazyflymake-load: mask=%s regexp=%s code-file=%s"
@@ -89,14 +91,24 @@ This variable is for debug and unit test only.")
     (when (and buffer-file-name
                (string-match file-name-regexp buffer-file-name)
                ;; respect existing set up in `flymake-allowed-file-name-masks'
-               (not (cl-find-if `(lambda (e) (string= (car e) ,file-name-regexp))
-                                flymake-allowed-file-name-masks)))
+               (or (eq (length (setq filtered-masks (cl-remove-if
+                                                `(lambda (e)
+                                                   (string= (car e) ,file-name-regexp))
+                                                flymake-allowed-file-name-masks)))
+                       (length flymake-allowed-file-name-masks))
+                   force))
 
+      ;; delete existing set up first
+      (when (and filtered-masks force)
+        (setq flymake-allowed-file-name-masks filtered-masks))
+
+      (message "=====1")
       ;; library is loaded or functions inside the library are defined
       (unless (or (and (fboundp 'init-fn) (fboundp 'pattern-fn))
                   (featurep lib))
         (require lib))
 
+      (message "=====2")
       (let* ((pattern (funcall pattern-fn)))
         (if lazyflymake-debug (message "pattern=%s" pattern))
         (when pattern
@@ -217,6 +229,10 @@ This variable is for debug and unit test only.")
     (lazyflymake-load (lazyflymake-guess-shell-script-regexp) 'shell))
 
   (if lazyflymake-debug (message "flymake-allowed-file-name-masks=%s" flymake-allowed-file-name-masks))
+
+  ;; js-mode has its own linter
+  (unless (derived-mode-p 'js2-mode)
+    (lazyflymake-load "\\.[jt]s$" 'eslint))
 
   ;; initialize some internal variables of `flymake-mode'
   (flymake-mode-on)
