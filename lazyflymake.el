@@ -66,10 +66,12 @@
   "If it's t, `lazyflymake-start' starts buffer syntax check immediately.
 This variable is for debug and unit test only.")
 
+;;;###autoload
 (defun lazyflymake-new-flymake-p ()
   "Test the flymake version."
   (fboundp 'flymake-start))
 
+;;;###autoload
 (defun lazyflymake-load(file-name-regexp mask)
   "Load flymake MASK for files matching FILE-NAME-REGEXP."
   (let* ((lib (intern (concat "lazyflymake-" (symbol-name mask))))
@@ -89,7 +91,12 @@ This variable is for debug and unit test only.")
                ;; respect existing set up in `flymake-allowed-file-name-masks'
                (not (cl-find-if `(lambda (e) (string= (car e) ,file-name-regexp))
                                 flymake-allowed-file-name-masks)))
-      (unless (featurep lib) (require lib))
+
+      ;; library is loaded or functions inside the library are defined
+      (unless (or (and (fboundp 'init-fn) (fboundp 'pattern-fn))
+                  (featurep lib))
+        (require lib))
+
       (let* ((pattern (funcall pattern-fn)))
         (if lazyflymake-debug (message "pattern=%s" pattern))
         (when pattern
@@ -138,7 +145,7 @@ This variable is for debug and unit test only.")
       (format "\\%s$" (file-name-base buffer-file-name))))))
 
 (defun lazyflymake--extract-err (output idx)
-  "Extract error informationfrom OUTPUT using IDX."
+  "Extract error information from OUTPUT using IDX."
   (cond
    (idx
     (match-string idx output))
@@ -163,7 +170,7 @@ This variable is for debug and unit test only.")
 
 ;;;###autoload
 (defun lazyflymake-test-err-line-pattern ()
-  "Test one line of command line progam output by `flymake-err-line-patterns'."
+  "Test one line of command line program output by `flymake-err-line-patterns'."
   (interactive)
   (let* ((output (read-string "One line of CLI output: "))
          (i 0)
