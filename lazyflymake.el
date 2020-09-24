@@ -197,7 +197,7 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
     ov))
 
 (defun lazyflymake-current-file-p (file)
-  "FILE does match `buffer-file-name'."
+  "FILE does match current buffer's path."
 
   ;; algorithms to match file
   ;; - exactly same as full path name or at least file name is same
@@ -254,10 +254,35 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
           (when (or (lazyflymake-current-file-p file)
                     (eq major-mode 'emacs-lisp-mode))
             (push (lazyflymake-make-overlay err) ovs))))
-      ;; remove overlay without binding buffer
-      (setq ovs (cl-remove-if (lambda (ov) (not (overlay-start ov))) ovs))
       (setq lazyflymake-overlays
-            (sort ovs (lambda (a b) (< (overlay-start a) (overlay-start b))))))))
+            (lazyflymake-sdk-valid-overlays ovs)))))
+
+(defun lazyflymake-overlay-to-string (overlay)
+  "Format OVERLAY to string."
+  (let* ((line (count-lines (point-min) (overlay-start overlay)))
+         (err-text (overlay-get overlay 'help-echo)))
+    (format "line %s: %s" line err-text)))
+
+(defun lazyflymake-list-errors ()
+  "List errors in current buffer."
+  (interactive)
+  (let* (ovs)
+    (cond
+     (lazyflymake-flymake-mode-on
+      (lazyflymake-sdk-hint))
+
+     ((not (setq ovs (lazyflymake-sdk-valid-overlays lazyflymake-overlays)))
+      (message "No error found."))
+
+     (t
+      (let* ((cands (mapcar (lambda (o)
+                              (cons (lazyflymake-overlay-to-string o) o))
+                            ovs))
+             (err (completing-read "Go to: " cands))
+             ov)
+        (when err
+          (setq ov (cdr (assoc err cands)))
+          (lazyflymake-goto-overlay-center ov)))))))
 
 (defun lazyflymake-proc-output (process)
   "The output of PROCESS."
