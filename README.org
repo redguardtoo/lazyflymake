@@ -12,14 +12,26 @@ Place =*.el= under [[https://www.gnu.org/software/emacs/manual/html_node/elisp/L
 * Usage
 This program is based on =flymake= API. So your existing configuration for =flymake= still works.
 
-You only need delete =(flymake-mode 1)= from you Emacs configuration and insert one line set up:
 #+begin_src elisp
 (add-hook 'prog-mode-hook #'lazyflymake-start)
 #+end_src
 
-Errors are reported after saving current file.
+By default, =flymake-mode= is turned on in =lazyflymake-start=. You could keep using all the commands from flymake.
 
-Use =flymake-goto-next-error= and =flymake-goto-prev-error= to locate errors.
+Use =lazyflymake-goto-next-error= and =lazyflymake-goto-prev-error= to locate errors.
+
+There is also a light weight mode which does not use =flymake-mode=.
+
+Enable it by insert extra one line set up,
+#+begin_src elisp
+(setq lazyflymake-flymake-mode-on nil)
+#+end_src
+
+So =flymake-mode= is not turned on by =lazyflymake-start= automatically.
+
+The syntax check happens *if and only if current buffer is saved*.
+
+An extra command =lazyflymake-list-errors= is provided in light weight mode.
 
 Please note this program also set up flymake for Shell script, Emacs Lisp, and Lua automatically.
 

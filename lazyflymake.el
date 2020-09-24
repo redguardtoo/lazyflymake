@@ -24,14 +24,27 @@
 ;; along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;;  Remove "(flymake-mode 1)" from ~/.emacs and insert below line instead,
 ;;
+;; One line to set up flymake and start flymake-mode,
 ;;    (add-hook 'prog-mode-hook #'lazyflymake-start)
 ;;
-;; Errors are reported after saving current file.
-;; Use `flymake-goto-next-error', `flymake-goto-prev-error' to locate errors.
+;; By default, flymake-mode is turned on in `lazyflymake-start'.
+;; You could keep using all the commands from flymake.
 ;;
-;; Please note this program also set up flymake for Shell script, Emacs Lisp,
+;; This program also provides below commands to locate errors/warnings:
+;; - `lazyflymake-goto-next-error'
+;; - `lazyflymake-goto-prev-error'
+;;
+;; There is also a light weight mode which does not use flymake-mode.
+;; Enable it by insert extra one line set up,
+;;
+;;   (setq lazyflymake-flymake-mode-on nil)
+;;
+;; So flymake-mode is not turned on by `lazyflymake-start' automatically.
+;; The syntax check happens if and only if current buffer is saved.
+;; Extra command `lazyflymake-list-errors' is provided in light weight mode.
+;;
+;; This program also sets up flymake for Shell script, Emacs Lisp,
 ;; and Lua automatically.
 ;;
 ;; Shellcheck (https://github.com/koalaman/shellcheck) is required to check
