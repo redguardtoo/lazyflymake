@@ -75,7 +75,7 @@ is used when current file is saved."
   :group 'lazyflymake
   :type '(repeat 'sexp))
 
-(defcustom lazyflymake-file-match-algorithm "strict"
+(defcustom lazyflymake-file-match-algorithm nil
   "The algorithm to match file name.
 If it's \"string\", the full path of file should be same as current code file.
 If it's nil, do not check file at all."
