@@ -552,6 +552,10 @@ Return the running process."
     ;; File with `sh-mode' is shell script
     (lazyflymake-load (lazyflymake-guess-shell-script-regexp) 'shell))
 
+  ;; octave/matlab
+  (when (memq major-mode '(octave-mode matlab-mode))
+    (lazyflymake-load "\\.m$" 'octave))
+
   (when lazyflymake-debug
     (message "flymake-allowed-file-name-masks=%s" flymake-allowed-file-name-masks))
 
