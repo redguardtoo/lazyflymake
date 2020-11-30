@@ -1,4 +1,4 @@
-;;; evil-matchit-tests.el ---  unit tests for evil-matchit -*- coding: utf-8 -*-
+;;; lazyflymake-tests.el ---  unit tests for lazyflymake -*- coding: utf-8 -*-
 
 ;; Author: Chen Bin <chenbin DOT sh AT gmail DOT com>
 
@@ -28,16 +28,20 @@
 (setq lazyflymake-debug nil) ; debug
 (setq lazyflymake-start-check-now t)
 
+(defun lazyflymake-test-open-file (file)
+  "Read FILE's content into current buffer."
+  (let* ((files (directory-files-recursively default-directory file)))
+    (when files
+      (find-file (car files)))))
+
 (ert-deftest lazyflymake-test-generic ()
-  (let* ((str "(message \"hello\")\n(message\n(message \"world\")\n(provide 'hello)\n;;; hello.el ends here"))
-    (with-temp-buffer
-      (insert str)
-      (emacs-lisp-mode)
-      (setq buffer-file-name "hello.el")
-      (goto-char (point-min))
-      (lazyflymake-start)
-      (flymake-goto-next-error)
-      (should t))))
+  (let* ((lazyflymake-start-check-now t)
+         (lazyflymake-flymake-mode-on nil))
+    (lazyflymake-test-open-file "test-elisp.el")
+    (goto-char (point-min))
+    (lazyflymake-start)
+    (flymake-goto-next-error)
+    (should t)))
 
 (ert-run-tests-batch-and-exit)
-;;; evil-matchit-tests.el ends here
+;;; lazyflymake-tests.el ends here
