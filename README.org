@@ -20,7 +20,7 @@ By default, =flymake-mode= is turned on in =lazyflymake-start=. You could keep u
 
 Use =lazyflymake-goto-next-error= and =lazyflymake-goto-prev-error= to locate errors.
 
-There is also a light weight mode which does not use =flymake-mode=.
+There is also a lightweight mode which does not use =flymake-mode=.
 
 Enable it by insert extra one line set up,
 #+begin_src elisp
@@ -31,13 +31,14 @@ So =flymake-mode= is not turned on by =lazyflymake-start= automatically.
 
 The syntax check happens *if and only if current buffer is saved*.
 
-An extra command =lazyflymake-list-errors= is provided in light weight mode.
+An extra command =lazyflymake-list-errors= is provided in lightweight mode.
 
 Please note this program also set up flymake for Shell script, Emacs Lisp, and Lua automatically.
-
-[[https://github.com/koalaman/shellcheck][Shellcheck]] is required to check shell script.
-
-Lua executable is required to check Lua code.
+* Tips
+- [[https://github.com/koalaman/shellcheck][Shellcheck]] is required to check shell script
+- Lua executable is required to check Lua code
+- [[https://github.com/florianschanda/miss_hit][MISS_HIT]] is required to check octave/matlab code
+- Customize =lazyflymake-ignore-error-function= to ignore errors extracted from linter output.
 * Contact me
 Report bugs at [[https://github.com/redguardtoo/lazyflymake]].
 * License

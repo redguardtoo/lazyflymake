@@ -44,13 +44,19 @@
 ;; The syntax check happens if and only if current buffer is saved.
 ;; Extra command `lazyflymake-list-errors' is provided in light weight mode.
 ;;
-;; This program also sets up flymake for Shell script, Emacs Lisp,
+;; Customize `lazyflymake-ignore-error-function' to ignore errors extracted
+;; from linter output.
+;;
+;; This program also sets up flymake for Shell script, Emacs Lisp, Octave/Matlab,
 ;; and Lua automatically.
 ;;
 ;; Shellcheck (https://github.com/koalaman/shellcheck) is required to check
 ;; shell script.
 ;;
 ;; Lua executable is required to check Lua code.
+;;
+;; MISS_HIT (https://github.com/florianschanda/miss_hit) is required to check
+;; octave/matlab code.
 ;;
 
 ;;; Code:
@@ -85,6 +91,12 @@ If it's nil, do not check file at all."
 (defcustom lazyflymake-check-buffer-max (* 128 1024 1024)
   "Max size of buffer to run `lazyflymake-check-buffer'."
   :type 'integer
+  :group 'lazyflymake)
+
+(defcustom lazyflymake-ignore-error-function (lambda (err) (ignore err))
+  "User defined function to ignore some errors.
+The parameter (list file beg end error-message) is passed into this function."
+  :type 'function
   :group 'lazyflymake)
 
 (defvar lazyflymake-overlays nil "The overlays for syntax errors.")
@@ -257,7 +269,8 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
       ;; extract syntax errors
       (dolist (l (split-string output "[\r\n]+"  t "[ \t]+"))
         (let* ((err (lazyflymake-parse-err-line l)))
-          (when err (push err errors))))))
+          (when (and err (not (funcall lazyflymake-ignore-error-function err)))
+            (push err errors))))))
     errors))
 
 (defun lazyflymake-show-errors (errors)
