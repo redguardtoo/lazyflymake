@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2020 Chen Bin
 ;;
-;; Version: 0.0.3
+;; Version: 0.0.4
 ;; Keywords: convenience, languages, tools
 ;; Author: Chen Bin <chenbin DOT sh AT gmail DOT com>
 ;; URL: https://github.com/redguardtoo/lazyflymake
@@ -57,6 +57,8 @@
 ;;
 ;; MISS_HIT (https://github.com/florianschanda/miss_hit) is required to check
 ;; octave/matlab code.
+;;
+;; Tidy (http://www.html-tidy.org/) is require to check html code
 ;;
 
 ;;; Code:
@@ -158,8 +160,10 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
         (when pattern
           (cond
            ((stringp (car pattern))
+            (if lazyflymake-debug (message "push the pattern to `flymake-err-line-patterns'."))
             (push pattern flymake-err-line-patterns))
            ((listp pattern)
+            (if lazyflymake-debug (message "set pattern to buffer local variable."))
             (setq-local flymake-err-line-patterns pattern)))))
       (push (list file-name-regexp init-fn) flymake-allowed-file-name-masks))))
 
@@ -174,6 +178,11 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
 
 (defun lazyflymake-parse-err-line (text)
   "Extract error information from TEXT."
+  (when lazyflymake-debug
+    (message "lazyflymake-parse-err-line called text=%s err-line-patterns=%s"
+             text
+             flymake-err-line-patterns))
+
   (let* (rlt (i 0) )
     (while (and (not rlt)
                 flymake-err-line-patterns
@@ -188,12 +197,16 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
              line
              col
              err-text)
+        (when lazyflymake-debug
+          (message "regexp=%s matched=%s" regexp (string-match regexp text)))
         (when (string-match regexp text)
           (setq file (and file-idx (match-string file-idx text)))
           (setq line (and line-idx (match-string line-idx text)))
           (setq col (and col-idx (match-string col-idx text)))
           (setq err-text (and err-text-idx (match-string err-text-idx text)))
-          (when (and file line err-text)
+          (when lazyflymake-debug
+            (message "file=%s line=%s col=%s err-text=%s" file line col err-text))
+          (when (and line err-text)
             (setq col (if col (1- (string-to-number col)) 0))
             (save-excursion
               (goto-char (point-min))
@@ -249,6 +262,9 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
 
 (defun lazyflymake-extract-errors (output)
   "Extract errors from command line OUTPUT."
+  (when lazyflymake-debug
+    (message "lazyflymake-extract-errors called. output=%s" output))
+
   (let* (errors)
     (cond
      ((and (version< "25" emacs-version) (eq major-mode 'emacs-lisp-mode))
@@ -266,11 +282,13 @@ If FORCE is t, the existing set up in `flymake-allowed-file-name-masks' is repla
                                          (nth 0 e)))
                                  original-errors))))))
      (t
-      ;; extract syntax errors
-      (dolist (l (split-string output "[\r\n]+"  t "[ \t]+"))
-        (let* ((err (lazyflymake-parse-err-line l)))
-          (when (and err (not (funcall lazyflymake-ignore-error-function err)))
-            (push err errors))))))
+      (let* ((lines (split-string output "[\r\n]+"  t "[ \t]+")))
+;; extract syntax errors
+        (dolist (l lines)
+          (let* ((err (lazyflymake-parse-err-line l)))
+            (if lazyflymake-debug (message "err=%s" err))
+            (when (and err (not (funcall lazyflymake-ignore-error-function err)))
+              (push err errors)))))))
     errors))
 
 (defun lazyflymake-show-errors (errors)
@@ -555,6 +573,10 @@ Return the running process."
   ;; octave/matlab
   (when (memq major-mode '(octave-mode matlab-mode))
     (lazyflymake-load "\\.m$" 'octave))
+
+  ;; html/xml
+  (lazyflymake-load "\\.html?\\'" 'html t)
+  (lazyflymake-load "\\.xml\\'" 'html t)
 
   (when lazyflymake-debug
     (message "flymake-allowed-file-name-masks=%s" flymake-allowed-file-name-masks))

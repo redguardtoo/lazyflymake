@@ -38,6 +38,7 @@ Please note this program also set up flymake for Shell script, Emacs Lisp, and L
 - [[https://github.com/koalaman/shellcheck][Shellcheck]] is required to check shell script
 - Lua executable is required to check Lua code
 - [[https://github.com/florianschanda/miss_hit][MISS_HIT]] is required to check octave/matlab code
+- [[http://www.html-tidy.org/][Tidy]] is require to check html code
 - Customize =lazyflymake-ignore-error-function= to ignore errors extracted from linter output.
 * Contact me
 Report bugs at [[https://github.com/redguardtoo/lazyflymake]].
