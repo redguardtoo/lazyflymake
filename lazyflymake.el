@@ -354,38 +354,44 @@ Return the running process."
                 (string-match (car m) buffer-file-name))
               flymake-proc-allowed-file-name-masks))
 
+(defun lazyflymake-run-check-and-report (program args)
+  (let* ((buf (lazyflymake-proc-buffer t))
+         (proc (lazyflymake-run-program program args buf)))
+    (lazyflymake-clear-errors)
+    (set-process-sentinel proc #'lazyflymake-proc-report)
+
+    ;; check emacs lisp code doc in another process
+    (when (and (eq major-mode 'emacs-lisp-mode)
+               (fboundp 'elisp-flymake-checkdoc))
+      (elisp-flymake-checkdoc (lambda (diags)
+                                (let* (errs beg end)
+                                  (dolist (d diags)
+                                    (setq beg (or (flymake--diag-beg d) 0))
+                                    (setq end (or (flymake--diag-end d)
+                                                  (save-excursion
+                                                    (goto-char beg)
+                                                    (line-end-position))))
+                                    (push (list buffer-file-name beg end (flymake--diag-text d))
+                                          errs))
+                                  (when errs
+                                    (lazyflymake-show-errors (nreverse errs))))))))
+  )
+
+;;;###autoload
 (defun lazyflymake-start-buffer-checking-process ()
   "Check current buffer right now."
-  (let* ((backend (lazyflymake-find-backend))
-         (proc (get-process lazyflymake-process-name)))
+  (let* ((backend (lazyflymake-find-backend)))
     (when (and backend
                ;; the previous check process should stopped
-               (not proc))
+               (not (get-process lazyflymake-process-name)))
       (unwind-protect
           (let* ((init-fn (nth 1 backend))
                  (cmd-and-args (funcall init-fn))
                  (program (car cmd-and-args))
-                 (args (nth 1 cmd-and-args))
-                 (buf (lazyflymake-proc-buffer t))
-                 (proc (lazyflymake-run-program program args buf)))
-            (lazyflymake-clear-errors)
-            (set-process-sentinel proc #'lazyflymake-proc-report)
-
-            ;; check emacs lisp code doc in another process
-            (when (and (eq major-mode 'emacs-lisp-mode)
-                       (fboundp 'elisp-flymake-checkdoc))
-              (elisp-flymake-checkdoc (lambda (diags)
-                                        (let* (errs beg end)
-                                          (dolist (d diags)
-                                            (setq beg (or (flymake--diag-beg d) 0))
-                                            (setq end (or (flymake--diag-end d)
-                                                          (save-excursion
-                                                            (goto-char beg)
-                                                            (line-end-position))))
-                                            (push (list buffer-file-name beg end (flymake--diag-text d))
-                                                  errs))
-                                          (when errs
-                                            (lazyflymake-show-errors (nreverse errs))))))))))))
+                 (args (nth 1 cmd-and-args)))
+            ;; the program could be set by flymake but not installed
+            (when (and program (executable-find program))
+              (lazyflymake-run-check-and-report program args)))))))
 
 (defun lazyflymake-check-buffer ()
   "Spell check current buffer."
