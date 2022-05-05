@@ -1,11 +1,11 @@
 * lazyflymake
 Lightweight syntax checker for Emacs, alternative of =flymake-mode=.
 
-It's does less CPU computing and costs less memory than its rivals.
-
-In below screenshot, this program is tested in both Emacs 26 and Emacs 25 (left side is Emacs 26, right side is Emacs 25),
+Less CPU computing and less memory footprint.
 
 [[file:demo.png]]
+
+Since version 0.5, only Emacs 27.1+ is supported.
 
 * Install
 Place =*.el= under [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][Load Path]]. Then add =(require 'lazyflymake)= to your configuration.
@@ -16,25 +16,31 @@ This program is based on =flymake= API. So your existing configuration for =flym
 (add-hook 'prog-mode-hook #'lazyflymake-start)
 #+end_src
 
-By default, =flymake-mode= is turned on in =lazyflymake-start=. You could keep using all the commands from flymake.
+By default, =flymake-mode= is turned on in =lazyflymake-start=.
 
 Use =lazyflymake-goto-next-error= and =lazyflymake-goto-prev-error= to locate errors.
 
 There is also a lightweight mode which does not use =flymake-mode=.
 
-Enable it by insert extra one line set up,
+Enable it by insert extra one liner before calling =flymake-start=,
 #+begin_src elisp
 (setq lazyflymake-flymake-mode-on nil)
 #+end_src
 
-So =flymake-mode= is not turned on by =lazyflymake-start= automatically.
+Then =flymake-mode= is not turned on by =lazyflymake-start= automatically.
 
 The syntax check happens *if and only if current buffer is saved*.
 
-An extra command =lazyflymake-list-errors= is provided in lightweight mode.
+The command =lazyflymake-list-errors= is provided in lightweight mode.
 
-Please note this program also set up flymake for Shell script, Emacs Lisp, and Lua automatically.
+There are also other optional commands,
+- =lazyflymake-stop= stops the checking process and uninstall running code in =after-save-hook= and turn off =flymake-mode=.
+- =lazyflymake-check-current-buffer= always checks current buffer, ignoring other setup.
+
+=lazyflymake-program-extra-args= contains extra arguments passed to linter cli program. It could be converted to buffer local variable.
+
 * Tips
+This program also sets up flymake for Shell script, Emacs Lisp, and Lua automatically,
 - [[https://github.com/koalaman/shellcheck][Shellcheck]] is required to check shell script
 - Lua executable is required to check Lua code
 - [[https://github.com/florianschanda/miss_hit][MISS_HIT]] is required to check octave/matlab code
