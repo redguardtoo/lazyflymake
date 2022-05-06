@@ -125,8 +125,8 @@ This variable is for debug and unit test only.")
   "Name of the running process.")
 
 ;;;###autoload
-(defun lazyflymake-load(file-name-regexp mask &optional force)
-  "Load flymake MASK for files matching FILE-NAME-REGEXP.
+(defun lazyflymake-load(mask file-name-regexp major-modes &optional force)
+  "Load flymake MASK for files matching FILE-NAME-REGEXP and MAJOR-MODES.
 If FORCE is t, setup in `flymake-proc-allowed-file-name-masks' is replaced."
   (let* ((lib (intern (concat "lazyflymake-" (symbol-name mask))))
          (prefix (concat "lazyflymake-" (symbol-name mask)))
@@ -364,9 +364,21 @@ If FORCE is t, setup in `flymake-proc-allowed-file-name-masks' is replaced."
 
 (defun lazyflymake-find-backend ()
   "Find backend."
-  (cl-find-if (lambda (m)
+  (let (backend)
+    (cond
+     ;; fine backend by file name
+     (buffer-file-name
+      (setq backend
+            (cl-find-if (lambda (m)
                 (string-match (car m) buffer-file-name))
-              flymake-proc-allowed-file-name-masks))
+              flymake-proc-allowed-file-name-masks)))
+
+     ;; find backend by `major-mode'
+     (t
+      ))
+    (when lazyflymake-debug
+      (message "lazyflymake-find-backend called. backend=%s" backend))
+    backend))
 
 (defun lazyflymake-run-check-and-report (program args)
   "Run syntax check cli PROGRAM with ARGS and report errors."
@@ -461,12 +473,13 @@ If FORCE is t, the buffer is checked always."
 
 (defun lazyflymake-guess-shell-script-regexp ()
   "Guess shell script file name regex."
-  (let* ((ext (file-name-extension buffer-file-name)))
-    (cond
-     (ext
-      (format "\\.%s$" ext))
-     (t
-      (format "\\%s$" (file-name-base buffer-file-name))))))
+  (when buffer-file-name
+    (let* ((ext (file-name-extension buffer-file-name)))
+      (cond
+       (ext
+        (format "\\.%s$" ext))
+       (t
+        (format "\\%s$" (file-name-base buffer-file-name)))))))
 
 (defun lazyflymake--extract-err (output idx)
   "Extract error information from OUTPUT using IDX."
@@ -569,29 +582,25 @@ If FORCE is t, the buffer is checked always."
   ;; Since Emacs 26, `flymake-mode' uses `elisp-flymake-byte-compile'
   ;; and `elisp-flymake-checkdoc'.
   (unless lazyflymake-flymake-mode-on
-    (lazyflymake-load "\\.el$" 'elisp))
+    (lazyflymake-load 'elisp "\\.el$" nil))
 
-  (lazyflymake-load "\\.lua$" 'lua)
+  (lazyflymake-load 'lua "\\.lua$" '(lua-mode))
 
   ;; a bit hard to get regex matching all shell script files
-  (when (and (memq major-mode lazyflymake-shell-script-modes)
-             (lazyflymake-sdk-file-exist-p))
-    ;; File with `sh-mode' is shell script
-    (lazyflymake-load (lazyflymake-guess-shell-script-regexp) 'shell))
+  ;; File with `sh-mode' is shell script
+  (lazyflymake-load 'shell (lazyflymake-guess-shell-script-regexp) lazyflymake-shell-script-modes)
 
   ;; octave/matlab
-  (when (memq major-mode '(octave-mode matlab-mode))
-    (lazyflymake-load "\\.m$" 'octave))
+  (lazyflymake-load 'octave "\\.m$" '(octave-mode matlab-mode))
 
   ;; html/xml
-  (lazyflymake-load "\\.\\(lhtml?\\|xml\\)\\'" 'html t)
+  (lazyflymake-load 'html "\\.\\(lhtml?\\|xml\\)\\'" nil t)
+
+  ;; eslint is always used even `js2-mode' has its builtin linter
+  (lazyflymake-load 'eslint "\\.[jt]sx?$" '(js-mode))
 
   (when lazyflymake-debug
     (message "flymake-proc-allowed-file-name-masks=%s" flymake-proc-allowed-file-name-masks))
-
-  ;; eslint is always used even `js2-mode' has its builtin linter
-  (unless (derived-mode-p 'js-mode)
-    (lazyflymake-load "\\.[jt]sx?$" 'eslint))
 
   ;; initialize some internal variables of `flymake-mode'
   (flymake-mode 1)
