@@ -584,8 +584,7 @@ If FORCE is t, the buffer is checked always."
     (lazyflymake-load "\\.m$" 'octave))
 
   ;; html/xml
-  (lazyflymake-load "\\.html?\\'" 'html t)
-  (lazyflymake-load "\\.xml\\'" 'html t)
+  (lazyflymake-load "\\.\\(lhtml?\\|xml\\)\\'" 'html t)
 
   (when lazyflymake-debug
     (message "flymake-proc-allowed-file-name-masks=%s" flymake-proc-allowed-file-name-masks))
