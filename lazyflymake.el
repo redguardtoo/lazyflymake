@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2020-2022 Chen Bin
 ;;
-;; Version: 0.0.5
+;; Version: 0.0.6
 ;; Keywords: convenience, languages, tools
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: https://github.com/redguardtoo/lazyflymake
@@ -590,8 +590,10 @@ If FORCE is t, the buffer is checked always."
     (message "flymake-proc-allowed-file-name-masks=%s" flymake-proc-allowed-file-name-masks))
 
   ;; eslint is always used even `js2-mode' has its builtin linter
-  (unless (derived-mode-p 'js-mode)
-    (lazyflymake-load "\\.[jt]sx?$" 'eslint))
+  (lazyflymake-load "\\.[jt]sx?$" 'eslint)
+
+  (when (derived-mode-p 'yaml-mode)
+    (lazyflymake-load "\\.ya?ml$" 'yamllint))
 
   ;; initialize some internal variables of `flymake-mode'
   (flymake-mode 1)
