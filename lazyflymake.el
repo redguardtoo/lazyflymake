@@ -1,8 +1,8 @@
 ;;; lazyflymake.el --- Lightweight syntax checker for Emacs, alternative of `flymake-mode' -*- lexical-binding: t -*-
 
-;; Copyright (C) 2020-2022 Chen Bin
+;; Copyright (C) 2020-2025 Chen Bin
 ;;
-;; Version: 0.0.7
+;; Version: 0.0.8
 ;; Keywords: convenience, languages, tools
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; URL: https://github.com/redguardtoo/lazyflymake
