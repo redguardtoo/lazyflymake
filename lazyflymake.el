@@ -571,7 +571,7 @@ If FORCE is t, the buffer is checked always."
   (unless lazyflymake-flymake-mode-on
     (lazyflymake-load "\\.el$" 'elisp))
 
-  (lazyflymake-load "\\.lua$" 'lua)
+  (lazyflymake-load "\\.luau?$" 'lua)
 
   ;; a bit hard to get regex matching all shell script files
   (when (and (memq major-mode lazyflymake-shell-script-modes)
