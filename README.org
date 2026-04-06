@@ -5,7 +5,9 @@ Less CPU computing and less memory footprint.
 
 [[file:demo.png]]
 
-Since version 0.5, only Emacs 27.1+ is supported.
+Please note lazyflymake only supports Emacs 27, Emacs 28, and Emacs 29.
+
+Its development is stopped because new flymake is light weight enough now.
 
 * Install
 Place =*.el= under [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][Load Path]]. Then add =(require 'lazyflymake)= to your configuration.
